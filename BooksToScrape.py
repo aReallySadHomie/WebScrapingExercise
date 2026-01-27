@@ -4,6 +4,8 @@ from DeepBookScraper import *
 from tqdm import tqdm
 
 # TODO scraping delle pagine max, oppure provare while response.status_code == 200 o altri HTTP response status codes
+# TODO implementare il multithreading
+# TODO passare da csv a PostgreSQL
 MAXPAGES = 50
 BOOKS_FILENAME = "books.csv"
 # sistemare i parametri, impostare i default
