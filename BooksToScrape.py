@@ -1,3 +1,4 @@
+import os.path
 from bs4 import BeautifulSoup
 import requests
 import csv
@@ -5,13 +6,19 @@ from DeepBookScraper import *
 from tqdm import tqdm
 
 # TODO scraping delle pagine max, oppure provare while response.status_code == 200 o altri HTTP response status codes
-MAXPAGES = 3
-
+MAXPAGES = 5
+BOOKS_FILENAME = "books.csv"
 # sistemare i parametri, impostare i default
 def book_scraper():
 
     base_url = "http://books.toscrape.com/catalogue/"
     all_books = []
+
+    csv_header = ["Title", "Price(£)","Description", "Rating", "Availability", "UPC", "URL"]
+    if not os.path.exists(BOOKS_FILENAME):
+        with open(BOOKS_FILENAME, "w", newline="", encoding="UTF-8-sig") as csvfile:
+            writer = csv.writer(csvfile, delimiter= ";")
+            writer.writerow(csv_header)
 
     for current_page in tqdm(range(1, MAXPAGES+1), desc = "Total progression", position=0):
         url = f"{base_url}page-{current_page}.html"
@@ -20,12 +27,17 @@ def book_scraper():
         soup = BeautifulSoup(response.text, "lxml")
         listed_books = soup.find_all("article", class_="product_pod")
 
-        for book in tqdm(listed_books, desc = f"Now scraping elements from page {current_page}",position = 1, leave = False):
-            book_url_snippet = book.h3.a.get("href", "URL not found")
-            book_url = base_url + book_url_snippet if book_url_snippet != "URL not found" else ""
+        with open(BOOKS_FILENAME, "a", newline="", encoding="UTF-8-sig") as csvfile:
+            writer = csv.writer(csvfile, delimiter=";", quotechar='"')
 
-            book_objects = deep_book_scraper(book_url)
-            all_books.append(book_objects)
+            for book in tqdm(listed_books, desc = f"Now scraping elements from page {current_page}",position = 1, leave = False):
+                book_url_snippet = book.h3.a.get("href", "URL not found")
+                book_url = base_url + book_url_snippet if book_url_snippet != "URL not found" else ""
+
+                book_object = deep_book_scraper(book_url)
+                if book_object:
+                    writer.writerow([*book_object.to_list(), book_url])
+                all_books.append(book_object)
 
     print(f"Found {len(all_books)} books:\n")
 

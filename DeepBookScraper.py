@@ -1,23 +1,20 @@
-from turtledemo.paint import switchupdown
-from unittest import case
-
 from bs4 import BeautifulSoup
 import requests
 import re
 
 class Book:
     def __init__(self, title, price, rating, availability, upc, description):
-        self.title = title
+        self.title = str(title)
         self.price = self.clean_price(price)
         self.rating = self.numeric_rating(rating)
         self.availability = self.clean_availability(availability)
         self.upc = upc
-        self.description = description
+        self.description = (str(description)[:50]).replace("\n", " ")+"..."
 
     @staticmethod
     def clean_price(price):
         #TODO sistemare la regex per includere i punti e le virgole
-        return float(re.search(r'(\d,)*\d+[,.]\d*', price).group())
+        return float(re.search(r'(\d,)*\d+([,.]\d)*', price).group())
 
     @staticmethod
     def clean_availability(availability):
@@ -41,11 +38,19 @@ class Book:
     def __repr__(self):
         return (f"Book: {self.title},\n"
                 f"Price: {self.price}£,\n"
-                f"Description: {self.description[:50]}...\n"
+                f"Description: {self.description}...\n"
                 f"Rating: {self.rating},\n"
                 f"Availability: {self.availability},\n"
                 f"UPC: {self.upc}\n")
 
+    def to_list(self):
+        return [self.title,
+                self.price,
+                self.description,
+                self.rating,
+                self.availability,
+                self.upc]
+# Capire perché il cvs esce così
 
 
 def deep_book_scraper(url) -> Book:
@@ -70,3 +75,4 @@ def deep_book_scraper(url) -> Book:
                 availability = availability,
                 upc = upc,
                 description = description)
+
