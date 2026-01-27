@@ -62,8 +62,11 @@ class Book:
 
 def deep_book_scraper(url) -> Book:
     # TODO gestire eventuali URL mancanti
-    response = requests.get(url, timeout=5)
-    soup = BeautifulSoup(response.text, "lxml")
+    response = requests.get(url)
+    try:
+        soup = BeautifulSoup(response.text, "lxml")
+    except:
+        soup = BeautifulSoup(response.text, "html.parser")
     article = soup.find("article", class_="product_page")
 
     # hardcoded, non ne vado fiero
