@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 import re
 
+
 class Book:
     def __init__(self, title, price, rating, availability, upc, description):
         self.title = str(title)
@@ -9,12 +10,19 @@ class Book:
         self.rating = self.numeric_rating(rating)
         self.availability = self.clean_availability(availability)
         self.upc = upc
-        self.description = (str(description)[:50]).replace("\n", " ")+"..."
+        self.description = (str(description)[:50]).replace("\n", " ") + "..."
 
     @staticmethod
     def clean_price(price):
-        #TODO sistemare la regex per includere i punti e le virgole
-        return float(re.search(r'(\d,)*\d+([,.]\d)*', price).group())
+        match = re.search(r"[\d,.]+", price)
+        if match:
+            raw_price = match.group()
+            cleaned_price = raw_price.replace(",", "")
+            try:
+                return float(cleaned_price)
+            except ValueError:
+                return 0.0
+        return 0.0
 
     @staticmethod
     def clean_availability(availability):
@@ -50,29 +58,28 @@ class Book:
                 self.rating,
                 self.availability,
                 self.upc]
-# Capire perché il cvs esce così
 
 
 def deep_book_scraper(url) -> Book:
-    #TODO gestire eventuali URL mancanti
+    # TODO gestire eventuali URL mancanti
     response = requests.get(url, timeout=5)
     soup = BeautifulSoup(response.text, "lxml")
     article = soup.find("article", class_="product_page")
 
+    # hardcoded, non ne vado fiero
     title = article.find("div", class_="col-sm-6 product_main").h1.get_text()
     price = article.find("p", class_="price_color").get_text()
     rating = article.find("p", class_="star-rating")["class"][1]
-    description = article.find_all("p")[3].get_text() # hardcoded, non ne vado fiero
+    description = article.find_all("p")[3].get_text()
 
     table = article.find("table", class_="table")
     rows = table.find_all("tr")
     upc = rows[0].td.text
     availability = rows[5].td.get_text()
 
-    return Book(title = title,
-                price = price,
-                rating = rating,
-                availability = availability,
-                upc = upc,
-                description = description)
-
+    return Book(title=title,
+                price=price,
+                rating=rating,
+                availability=availability,
+                upc=upc,
+                description=description)
