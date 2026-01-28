@@ -21,9 +21,9 @@ class DatabaseManager:
         # TODO generare una barra di caricamento
         connection = self.connection_pool.getconn()
 
-        # perché l'SQL injection è una cosa brutta
+        # perché l'SQL injection è una cosa brutta e non voglio avere in descrizione 'OR 1=1; DROP TABLE books;--
         query = """
-                INSERT INTO public.books (title, price, description, rating, availability, upc, url)
+                INSERT INTO books (title, price, description, rating, availability, upc, url)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (upc) DO UPDATE SET title       = excluded.title,
                                                 price       = EXCLUDED.price,
@@ -37,6 +37,7 @@ class DatabaseManager:
                 cursor.execute(query, (book.to_list()))
                 connection.commit()
         except psycopg2.Error as e:
+            connection.rollback()
             print(e)
 
         finally:
@@ -60,6 +61,9 @@ class DatabaseManager:
             with connection.cursor() as cursor:
                 cursor.execute(query)
                 connection.commit()
+        except psycopg2.Error as e:
+            connection.rollback()
+            print(e)
         finally:
             self.connection_pool.putconn(connection)
 
