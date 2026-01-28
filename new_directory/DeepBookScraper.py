@@ -4,13 +4,14 @@ import re
 
 
 class Book:
-    def __init__(self, title, price, rating, availability, upc, description):
+    def __init__(self, title, price, rating, availability, upc, description, url):
         self.title = str(title)
         self.price = self.clean_price(price)
         self.rating = self.numeric_rating(rating)
         self.availability = self.clean_availability(availability)
         self.upc = upc
         self.description = (str(description)[:50]).replace("\n", " ") + "..."
+        self.url = url
 
     @staticmethod
     def clean_price(price):
@@ -49,15 +50,17 @@ class Book:
                 f"Description: {self.description}...\n"
                 f"Rating: {self.rating},\n"
                 f"Availability: {self.availability},\n"
-                f"UPC: {self.upc}\n")
+                f"UPC: {self.upc},\n"
+                f"URL: {self.url}\n")
 
-    def to_list(self):
+    def to_list(self) -> list:
         return [self.title,
                 self.price,
                 self.description,
                 self.rating,
                 self.availability,
-                self.upc]
+                self.upc,
+                self.url]
 
 
 def deep_book_scraper(url) -> Book | None:
@@ -91,7 +94,8 @@ def deep_book_scraper(url) -> Book | None:
                     rating=rating,
                     availability=availability,
                     upc=upc,
-                    description=description)
+                    description=description,
+                    url=url)
 
     except Exception as e:
         return None

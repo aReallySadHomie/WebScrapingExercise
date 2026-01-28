@@ -35,7 +35,8 @@ def book_scraper():
         writer = csv.writer(csvfile, delimiter=";", quotechar='"')
 
         with ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
-            executor.map(lambda page: process_page(page, base_url, writer, progress_bar_pages, progress_bar_books, all_books, seen_books),
+            executor.map(lambda page: process_page(page, base_url, writer, progress_bar_pages,
+                                                   progress_bar_books, all_books, seen_books),
                          range(1, MAXPAGES+1))
 
     progress_bar_pages.close()

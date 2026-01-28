@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
+    <data-source source="LOCAL" name="***REMOVED***@***REMOVED***" uuid="c833a9c6-23dc-4df7-9241-6b6d79aa51c9">
+      <driver-ref>***REMOVED***ql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.***REMOVED***ql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:***REMOVED***ql://***REMOVED***:***REMOVED***/***REMOVED***</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+  </component>
+</project>

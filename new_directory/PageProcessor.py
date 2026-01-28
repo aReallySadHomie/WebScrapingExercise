@@ -4,7 +4,14 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 from new_directory.DeepBookScraper import deep_book_scraper
 
-def process_page(current_page, base_url, writer, progress_bar_pages, progress_bar_books, all_books, seen_urls):
+def process_page(current_page,
+                 base_url,
+                 writer,
+                 progress_bar_pages,
+                 progress_bar_books,
+                 all_books,
+                 seen_urls):
+
     url = f"{base_url}page-{current_page}.html"
     try:
         response = requests.get(url, timeout=5)
@@ -34,7 +41,7 @@ def process_page(current_page, base_url, writer, progress_bar_pages, progress_ba
 
             if book_obj:
                 with threading.Lock():
-                    writer.writerow([*book_obj.to_list(), book_url])
+                    writer.writerow(book_obj.to_list())
                 all_books.append(book_obj)
 
             progress_bar_books.update(1)
