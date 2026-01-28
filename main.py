@@ -5,9 +5,11 @@ import uvicorn
 app = FastAPI(title="Book API")
 db = DatabaseManager()
 
+
 @app.get("/")
 def homepage():
     return {"messaggio": "Welcome to Book API!"}
+
 
 @app.get("/stats")
 def get_stats():
@@ -31,7 +33,9 @@ def get_book(upc: str):
     connection = db.connection_pool.getconn()
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT title, price, description, rating, availability, upc, url FROM public.books WHERE upc = %s", (upc,))
+            cursor.execute(
+                "SELECT title, price, description, rating, availability, upc, url FROM public.books WHERE upc = %s",
+                (upc,))
             book = cursor.fetchone()
             if book:
                 return {

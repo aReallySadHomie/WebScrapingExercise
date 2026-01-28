@@ -16,22 +16,20 @@ class DatabaseManager:
         self.connection_pool = pool.ThreadedConnectionPool(1, 10, **self.parameters)
         self._create_table()
 
-
     def insert_book(self, book: Book):
 
-        #TODO generare una barra di caricamento
+        # TODO generare una barra di caricamento
         connection = self.connection_pool.getconn()
 
         # perché l'SQL injection è una cosa brutta
         query = """
                 INSERT INTO public.books (title, price, description, rating, availability, upc, url)
-                VALUES (%s,%s,%s,%s,%s,%s,%s)
-                ON CONFLICT (upc) DO UPDATE SET
-                    title = excluded.title,
-                    price = EXCLUDED.price,
-                    description = EXCLUDED.description,
-                    rating = EXCLUDED.rating,
-                    url = EXCLUDED.url
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (upc) DO UPDATE SET title       = excluded.title,
+                                                price       = EXCLUDED.price,
+                                                description = EXCLUDED.description,
+                                                rating      = EXCLUDED.rating,
+                                                url         = EXCLUDED.url
                 """
 
         try:
@@ -44,17 +42,18 @@ class DatabaseManager:
         finally:
             self.connection_pool.putconn(connection)
 
-
     def _create_table(self):
         query = """
-        CREATE TABLE IF NOT EXISTS books (
-        title TEXT NOT NULL,
-        price NUMERIC(10, 2),
-        description TEXT,
-        rating NUMERIC,
-        availability NUMERIC,
-        upc VARCHAR(16) PRIMARY KEY,
-        url TEXT);"""
+                CREATE TABLE IF NOT EXISTS books
+                (
+                    title        TEXT NOT NULL,
+                    price        NUMERIC(10, 2),
+                    description  TEXT,
+                    rating       NUMERIC,
+                    availability NUMERIC,
+                    upc          VARCHAR(16) PRIMARY KEY,
+                    url          TEXT
+                );"""
 
         connection = self.connection_pool.getconn()
         try:
@@ -63,8 +62,6 @@ class DatabaseManager:
                 connection.commit()
         finally:
             self.connection_pool.putconn(connection)
-
-
 
 
 def to_db(book_list: list[Book]):

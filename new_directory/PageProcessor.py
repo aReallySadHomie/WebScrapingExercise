@@ -12,7 +12,6 @@ def process_page(current_page,
                  progress_bar_books,
                  all_books,
                  seen_urls):
-
     url = f"{base_url}page-{current_page}.html"
     try:
         response = requests.get(url, timeout=5)
