@@ -1,52 +1,57 @@
 import os.path
-from bs4 import BeautifulSoup
-import requests
 import csv
-from DeepBookScraper import *
+import threading
 from tqdm import tqdm
+from concurrent.futures import ThreadPoolExecutor
 
-# TODO scraping delle pagine max, oppure provare while response.status_code == 200 o altri HTTP response status codes
-MAXPAGES = 5
+from new_directory.PageProcessor import process_page
+
+# TODO scraping delle pagine e libri max, oppure provare response.raise_for_status()
+# TODO passare da csv a PostgreSQL
+MAXPAGES = 50
+MAXBOOKS = 1000
 BOOKS_FILENAME = "books.csv"
+MAX_THREADS = 10
+csv.lock = threading.Lock()
+
 # sistemare i parametri, impostare i default
 def book_scraper():
 
     base_url = "http://books.toscrape.com/catalogue/"
     all_books = []
-
+    seen_books = set()
     csv_header = ["Title", "Price(£)","Description", "Rating", "Availability", "UPC", "URL"]
+    progress_bar_pages = tqdm(range(1, MAXPAGES+1), desc = "Scanned pages", position=0, leave=True)
+    progress_bar_books = tqdm(range(1, MAXBOOKS+1), desc = "Scanned books",position=1 , leave=True)
+
     if not os.path.exists(BOOKS_FILENAME):
         with open(BOOKS_FILENAME, "w", newline="", encoding="UTF-8-sig") as csvfile:
             writer = csv.writer(csvfile, delimiter= ";")
             writer.writerow(csv_header)
 
-    for current_page in tqdm(range(1, MAXPAGES+1), desc = "Total progression", position=0):
-        url = f"{base_url}page-{current_page}.html"
-        response = requests.get(url, timeout=5)
-        #TODO try except usando il lxml + l'html.parser
-        soup = BeautifulSoup(response.text, "lxml")
-        listed_books = soup.find_all("article", class_="product_pod")
+    # TODO multithread in diverse pagine
 
-        with open(BOOKS_FILENAME, "a", newline="", encoding="UTF-8-sig") as csvfile:
-            writer = csv.writer(csvfile, delimiter=";", quotechar='"')
+    with open(BOOKS_FILENAME, "a", newline="", encoding="UTF-8-sig") as csvfile:
+        writer = csv.writer(csvfile, delimiter=";", quotechar='"')
 
-            for book in tqdm(listed_books, desc = f"Now scraping elements from page {current_page}",position = 1, leave = False):
-                book_url_snippet = book.h3.a.get("href", "URL not found")
-                book_url = base_url + book_url_snippet if book_url_snippet != "URL not found" else ""
+        with ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
+            executor.map(lambda page: process_page(page, base_url, writer, progress_bar_pages, progress_bar_books, all_books, seen_books),
+                         range(1, MAXPAGES+1))
 
-                book_object = deep_book_scraper(book_url)
-                if book_object:
-                    writer.writerow([*book_object.to_list(), book_url])
-                all_books.append(book_object)
-
+    progress_bar_pages.close()
+    progress_bar_books.close()
     print(f"Found {len(all_books)} books:\n")
 
     return all_books
 
 if __name__== '__main__':
     detailed_book_list = book_scraper()
+    input("Press enter to continue...")
     for element in detailed_book_list:
         print(element)
 
     print("\n\n")
     input("Press enter to exit...")
+
+
+#        progress_bar_books = tqdm(listed_books, desc = f"Now scraping elements from page {current_page}",position = 1, leave = False)
