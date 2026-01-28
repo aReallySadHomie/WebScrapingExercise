@@ -1,7 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
-
 import psycopg2
-
 from ***REMOVED***ToScrape import MAX_THREADS
 from psycopg2 import pool
 from new_directory.DeepBookScraper import Book
@@ -20,6 +18,8 @@ class DatabaseManager:
 
 
     def insert_book(self, book: Book):
+
+        #TODO generare una barra di caricamento
         connection = self.connection_pool.getconn()
 
         # perché l'SQL injection è una cosa brutta

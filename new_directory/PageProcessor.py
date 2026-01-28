@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 from new_directory.DeepBookScraper import deep_book_scraper
 
+
 def process_page(current_page,
                  base_url,
                  writer,
