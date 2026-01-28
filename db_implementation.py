@@ -1,4 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor
+
+import psycopg2
+
 from ***REMOVED***ToScrape import MAX_THREADS
 from psycopg2 import pool
 from new_directory.DeepBookScraper import Book
@@ -21,8 +24,8 @@ class DatabaseManager:
 
         # perché l'SQL injection è una cosa brutta
         query = """
-                INSERT INTO books (title, price, description, rating, availability, upc, url)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,)
+                INSERT INTO public.books (title, price, description, rating, availability, upc, url)
+                VALUES (%s,%s,%s,%s,%s,%s,%s)
                 ON CONFLICT (upc) DO UPDATE SET
                     title = excluded.title,
                     price = EXCLUDED.price,
@@ -35,6 +38,8 @@ class DatabaseManager:
             with connection.cursor() as cursor:
                 cursor.execute(query, (book.to_list()))
                 connection.commit()
+        except psycopg2.Error as e:
+            print(e)
 
         finally:
             self.connection_pool.putconn(connection)

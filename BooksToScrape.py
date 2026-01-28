@@ -2,14 +2,13 @@ import os.path
 import csv
 import threading
 from tqdm import tqdm
-from concurrent.futures import ThreadPoolExecutor
-
+from db_implementation import *
 from new_directory.PageProcessor import process_page
 
 # TODO scraping delle pagine e libri max, oppure provare response.raise_for_status()
 # TODO passare da csv a PostgreSQL
-MAXPAGES = 50
-MAXBOOKS = 1000
+MAXPAGES = 5
+MAXBOOKS = MAXPAGES * 20
 BOOKS_FILENAME = "books.csv"
 MAX_THREADS = 10
 csv.lock = threading.Lock()
@@ -48,8 +47,7 @@ def book_scraper():
 if __name__== '__main__':
     detailed_book_list = book_scraper()
     input("Press enter to continue...")
-    for element in detailed_book_list:
-        print(element)
+    to_db(detailed_book_list)
 
     print("\n\n")
     input("Press enter to exit...")
