@@ -6,6 +6,8 @@ from new_directory.db_implementation import *
 from new_directory.PageProcessor import process_page
 
 # TODO scraping delle pagine e libri max, oppure provare response.raise_for_status()
+# TODO export in JSON
+
 MAXPAGES = 50
 MAXBOOKS = MAXPAGES * 20
 BOOKS_FILENAME = "books.csv"
