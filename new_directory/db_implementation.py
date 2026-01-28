@@ -1,17 +1,23 @@
 from concurrent.futures import ThreadPoolExecutor
 import psycopg2
-from ***REMOVED***ToScrape import MAX_THREADS
+from BooksToScrape import MAX_THREADS
 from psycopg2 import pool
 from new_directory.DeepBookScraper import Book
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
 class DatabaseManager:
     def __init__(self):
-        self.parameters = {"host": "***REMOVED***",
-                           "port": "***REMOVED***",
-                           "database": "***REMOVED***",
-                           "user": "***REMOVED***",
-                           "password": "***REMOVED***"}
+        self.parameters = {"host": os.getenv("DB_HOST"),
+                           "port": os.getenv("DB_PORT"),
+                           "database": os.getenv("DB_NAME"),
+                           "user": os.getenv("db_USER"),
+                           "password": os.getenv("db_PASSWORD")}
+
+        if not all(self.parameters.values()):
+            raise EnvironmentError("Please set environment variables in .env file")
 
         self.connection_pool = pool.ThreadedConnectionPool(1, 10, **self.parameters)
         self._create_table()

@@ -4,6 +4,8 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 from new_directory.DeepBookScraper import deep_book_scraper
 
+# TODO fix: il Lock qui dentro non sincronizza nulla,
+#  ogni thread crea il suo lock -> creare il lock in BooksToScrape.py
 
 def process_page(current_page,
                  base_url,
@@ -11,7 +13,8 @@ def process_page(current_page,
                  progress_bar_pages,
                  progress_bar_books,
                  all_books,
-                 seen_urls):
+                 seen_urls,
+                 lock):
     url = f"{base_url}page-{current_page}.html"
     try:
         response = requests.get(url, timeout=5)
@@ -32,7 +35,7 @@ def process_page(current_page,
             else:
                 continue
 
-            with threading.Lock():
+            with lock:
                 if book_url in seen_urls:
                     progress_bar_books.update(1)
                     continue

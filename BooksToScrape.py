@@ -8,13 +8,14 @@ from new_directory.PageProcessor import process_page
 # TODO scraping delle pagine e libri max, oppure provare response.raise_for_status()
 # TODO export in JSON
 
-MAXPAGES = 5
+MAXPAGES = 50
 MAXBOOKS = MAXPAGES * 20
 BOOKS_FILENAME = "books.csv"
 MAX_THREADS = 10
 
 
 def book_scraper():
+    shared_lock = threading.Lock()
     base_url = "http://books.toscrape.com/catalogue/"
     all_books = []
     seen_books = set()
@@ -33,7 +34,7 @@ def book_scraper():
         with ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
             # Ricordati che executor.map() accetta solamente una funzione con un solo argomento (che arriva dall'iterabile)
             executor.map(lambda page: process_page(page, base_url, writer, progress_bar_pages,
-                                                   progress_bar_books, all_books, seen_books),
+                                                   progress_bar_books, all_books, seen_books, shared_lock),
                          range(1, MAXPAGES + 1))
 
     progress_bar_pages.close()
