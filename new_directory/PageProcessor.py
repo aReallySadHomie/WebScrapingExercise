@@ -43,7 +43,7 @@ def process_page(current_page,
             book_obj = deep_book_scraper(book_url)
 
             if book_obj:
-                with threading.Lock():
+                with lock:
                     writer.writerow(book_obj.to_list())
                 all_books.append(book_obj)
 
