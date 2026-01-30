@@ -2,16 +2,10 @@ import os.path
 import csv
 import threading
 from tqdm import tqdm
-from new_directory.db_implementation import *
+from concurrent.futures import ThreadPoolExecutor
+from new_directory.db_implementation import to_db
 from new_directory.PageProcessor import process_page
-
-# TODO scraping delle pagine e libri max, oppure provare response.raise_for_status()
-# TODO export in JSON
-
-MAXPAGES = 50
-MAXBOOKS = MAXPAGES * 20
-BOOKS_FILENAME = "books.csv"
-MAX_THREADS = 10
+from config import MAXPAGES, MAXBOOKS, BOOKS_FILENAME, MAX_THREADS
 
 
 def book_scraper():

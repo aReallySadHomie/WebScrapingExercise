@@ -1,11 +1,9 @@
-import threading
 import requests
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 from new_directory.DeepBookScraper import deep_book_scraper
 
 # TODO fix: il Lock qui dentro non sincronizza nulla,
-#  ogni thread crea il suo lock -> creare il lock in BooksToScrape.py
 
 def process_page(current_page,
                  base_url,
