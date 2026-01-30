@@ -6,7 +6,7 @@ from ScrapingLogic.BookProcessor import Book
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv("config/.env")
 
 class DatabaseManager:
     def __init__(self):

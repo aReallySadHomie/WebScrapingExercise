@@ -59,8 +59,6 @@ if __name__ == '__main__':
     print(f"Found {len(all_books)} books:\n")
     input("Press enter to continue...")
 
-
-    breakpoint()
     to_db(all_books)
 
     print("\n\n")
