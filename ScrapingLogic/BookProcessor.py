@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 import re
 
+# TODO deep_book_scraper potrebbe essere un setter della classe book
 
 class Book:
     def __init__(self, title, price, rating, availability, upc, description, url):
@@ -63,8 +64,7 @@ class Book:
                 self.url]
 
 
-def deep_book_scraper(url) -> Book | None:
-    if not url: return None
+def process_book(url) -> Book | None:
 
     try:
         response = requests.get(url, timeout=5)
