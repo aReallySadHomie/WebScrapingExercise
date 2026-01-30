@@ -1,9 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 from tqdm import tqdm
-from ScrapingLogic.BookProcessor import process_book
+from ScrapingLogic.BookProcessor import process_book, Book
 from config.config import BASE_URL
-from BookProcessor import Book
 
 def process_page(url: str) -> set[Book] | None:
 
