@@ -1,53 +1,67 @@
-import os.path
-import csv
 import threading
+
+import requests
 from tqdm import tqdm
-from new_directory.db_implementation import *
-from new_directory.PageProcessor import process_page
-
-# TODO scraping delle pagine e libri max, oppure provare response.raise_for_status()
-# TODO export in JSON
-
-MAXPAGES = 50
-MAXBOOKS = MAXPAGES * 20
-BOOKS_FILENAME = "books.csv"
-MAX_THREADS = 10
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from PersistenceLogic.db_implementation import to_db
+from ScrapingLogic.PageProcessor import process_page
+from config.config import MAXPAGES, MAX_THREADS, BASE_URL, SAVE_TO_CSV
+from PersistenceLogic.csv_implementation import to_csv, generate_csv
 
 
-def book_scraper():
-    shared_lock = threading.Lock()
-    base_url = "http://books.toscrape.com/catalogue/"
-    all_books = []
-    seen_books = set()
-    csv_header = ["Title", "Price(£)", "Description", "Rating", "Availability", "UPC", "URL"]
-    progress_bar_pages = tqdm(range(1, MAXPAGES + 1), desc="Scanned pages", position=0, leave=True)
-    progress_bar_books = tqdm(range(1, MAXBOOKS + 1), desc="Scanned books", position=1, leave=True)
+def start_scraping(urls):
 
-    if not os.path.exists(BOOKS_FILENAME):
-        with open(BOOKS_FILENAME, "w", newline="", encoding="UTF-8-sig") as csvfile:
-            writer = csv.writer(csvfile, delimiter=";")
-            writer.writerow(csv_header)
+    with ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
 
-    with open(BOOKS_FILENAME, "a", newline="", encoding="UTF-8-sig") as csvfile:
-        writer = csv.writer(csvfile, delimiter=";", quotechar='"')
+        futures = [executor.submit(process_page, page) for page in urls]
+        for future in as_completed(futures):
+            yield future.result()
+
+# recupero delle pagine esistenti
+def discover_pages(url = BASE_URL)-> list | None:
+
+    with tqdm(range(1, MAXPAGES+1), desc="Analysing pages", unit="pages") as pbar:
+
+        def try_url(i):
+            trying_url = f"{url}page-{i}.html"
+            try:
+                response = requests.head(trying_url, timeout=5)
+                response.raise_for_status()
+                return trying_url
+            except requests.exceptions.RequestException:
+                return None
+            finally:
+                pbar.update(1)
 
         with ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
-            # Ricordati che executor.map() accetta solamente una funzione con un solo argomento (che arriva dall'iterabile)
-            executor.map(lambda page: process_page(page, base_url, writer, progress_bar_pages,
-                                                   progress_bar_books, all_books, seen_books, shared_lock),
-                         range(1, MAXPAGES + 1))
+            results = list(executor.map(try_url, range(1, MAXPAGES + 1)))
 
-    progress_bar_pages.close()
-    progress_bar_books.close()
-    print(f"Found {len(all_books)} books:\n")
-
-    return all_books
+    valid_urls = [url for url in results if url is not None]
+    return valid_urls
 
 
 if __name__ == '__main__':
-    detailed_book_list = book_scraper()
+    all_books = set()
+    all_pages = discover_pages()
+    scraped = start_scraping(all_pages)
+
+    if SAVE_TO_CSV:
+        generate_csv()
+
+    for data in tqdm(scraped, total=len(all_pages), desc="Scraping from pages"):
+        if data:
+            if SAVE_TO_CSV:
+                for d in data:
+                    to_csv(d.to_list())
+            all_books.update(data)
+
+
+    print(f"Found {len(all_books)} books:\n")
     input("Press enter to continue...")
-    to_db(detailed_book_list)
+
+
+    breakpoint()
+    to_db(all_books)
 
     print("\n\n")
     input("Press enter to exit...")

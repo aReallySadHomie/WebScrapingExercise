@@ -1,8 +1,8 @@
 from concurrent.futures import ThreadPoolExecutor
 import psycopg2
-from BooksToScrape import MAX_THREADS
+from config.config import MAX_THREADS
 from psycopg2 import pool
-from new_directory.DeepBookScraper import Book
+from ScrapingLogic.BookProcessor import Book
 import os
 from dotenv import load_dotenv
 
@@ -24,7 +24,6 @@ class DatabaseManager:
 
     def insert_book(self, book: Book):
 
-        # TODO generare una barra di caricamento
         connection = self.connection_pool.getconn()
 
         # perché l'SQL injection è una cosa brutta e non voglio avere in descrizione 'OR 1=1; DROP TABLE books;--
@@ -74,8 +73,8 @@ class DatabaseManager:
             self.connection_pool.putconn(connection)
 
 
-def to_db(book_list: list[Book]):
+def to_db(book_set: set[Book]):
     db = DatabaseManager()
-    print(f"Saving {len(book_list)} books into database...")
+    print(f"Saving {len(book_set)} books into database...")
     with ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
-        executor.map(db.insert_book, book_list)
+        executor.map(db.insert_book, book_set)
