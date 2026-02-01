@@ -39,7 +39,7 @@ class BookRepository(DatabaseConnector):
             print("Errore DB: ",e)
             raise
         finally:
-            connection.connection_pool.putconn(connection)
+            self.connection_pool.putconn(connection)
 
     def insert_book(self, book: Book):
         # perché l'SQL injection è una cosa brutta e non voglio avere in descrizione 'OR 1=1; DROP TABLE books;--
@@ -63,8 +63,8 @@ class BookRepository(DatabaseConnector):
         with self._get_cursor() as cursor:
             cursor.execute(query)
             avg_price, count = cursor.fetchone()
-            return {"Number of books": count,
-                    "Average price": float(avg_price) if avg_price else 0}
+        return {"Number of books": count,
+                "Average price": float(avg_price) if avg_price else 0}
 
     def get_book(self, upc: str):
         query = """
