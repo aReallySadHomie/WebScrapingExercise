@@ -1,9 +1,8 @@
-import threading
-
 import requests
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from PersistenceLogic.db_implementation import to_db
+
+from PersistenceLogic.save_to_db import to_db
 from ScrapingLogic.PageProcessor import process_page
 from config.config import MAXPAGES, MAX_THREADS, BASE_URL, SAVE_TO_CSV
 from PersistenceLogic.csv_implementation import to_csv, generate_csv

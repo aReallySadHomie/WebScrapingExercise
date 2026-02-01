@@ -1,6 +1,8 @@
 import csv
-from config.config import BOOKS_FILENAME, CSV_HEADER
 from os import path
+
+from config.config import BOOKS_FILENAME, CSV_HEADER
+
 
 def generate_csv():
     if not path.exists(BOOKS_FILENAME):

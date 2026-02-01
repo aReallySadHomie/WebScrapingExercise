@@ -1,19 +1,17 @@
 # TODO Provare a risolvere l'hardcoding dei selettori HTML: bassa priorità
-# TODO Usare un context manager per la gestione delle connessioni al PersistenceLogic
 # TODO Usare Pydantic per la validazione degli output della REST API
 # TODO Utilizzare SQLAlchemy per migliorare la manutenibilità
 # TODO Generare una barra di caricamento per il caricamento in PersistenceLogic
 # TODO Caricare in batch le tuple nella tabella del PersistenceLogic anziché una per una
-# TODO refactoring delle directory: creare directory per lo scraping, per il db e per la rest
 # TODO scraping delle pagine e libri max, oppure provare response.raise_for_status()
 
 
 from fastapi import FastAPI, HTTPException
-from PersistenceLogic.db_implementation import DatabaseManager
 import uvicorn
 
+from PersistenceLogic.book_repository import BookRepository
 app = FastAPI(title="Book API")
-db = DatabaseManager()
+db = BookRepository()
 
 
 @app.get("/")
