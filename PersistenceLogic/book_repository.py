@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 import psycopg2
 from dotenv import load_dotenv
+from fastapi import HTTPException
 
 from PersistenceLogic.db_connector import DatabaseConnector
 from ScrapingLogic.book_class import Book
@@ -84,4 +85,5 @@ class BookRepository(DatabaseConnector):
                     "upc": book[5],
                     "url": book[6],
                 }
-            return None
+
+            raise HTTPException(status_code=404, detail="Book not found")
