@@ -1,17 +1,25 @@
-from psycopg2 import pool
 import os
 
-class DatabaseConnector:
-    def __init__(self):
-        self.parameters = {
-            "host": os.getenv("DB_HOST"),
-            "port": os.getenv("DB_PORT"),
-            "database": os.getenv("DB_NAME"),
-            "user": os.getenv("db_USER"),
-            "password": os.getenv("db_PASSWORD")
-            }
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
 
-        if not all(self.parameters.values()):
-            raise EnvironmentError("Please set environment variables in .env file")
+load_dotenv("config/.env")
+postgres_url = f"postgresql://{os.getenv("DB_USER")}:{os.getenv("DB_PASSWORD")}@{os.getenv('DB_HOST')}:{os.getenv("DB_PORT")}/{os.getenv('DB_NAME')}"
+sqlite = f"sqlite:///./books.db"
 
-        self.connection_pool = pool.ThreadedConnectionPool(1, 10, **self.parameters)
+DB_URL = postgres_url
+
+# Creazione dell'engine per la gestione dei pool di connessione
+engine = create_engine(DB_URL)
+
+# Generatore di sessione
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
